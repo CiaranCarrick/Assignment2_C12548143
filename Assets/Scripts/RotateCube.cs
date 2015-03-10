@@ -2,12 +2,11 @@
 using System.Collections;
 
 public class RotateCube : MonoBehaviour {
-	public Transform turret, player;
+	public Transform player;
 	float shootTime, shootTimer = 0.3f;
 	float searchTime, searchTimer = 4f;
 	float randLookTime, randLookTimer = 0.3f;
 	Quaternion rotation = Quaternion.identity;
-	private float angle;
 	public float seconds = 0.2f;
 	public bool rotating;
 
@@ -33,19 +32,18 @@ public class RotateCube : MonoBehaviour {
 			break;
 		}
 		//Debug.Log (currentState);
-		Debug.DrawRay(turret.position, turret.transform.forward * 10f, Color.magenta);
+		Debug.DrawRay(transform.position, transform.transform.forward * 10f, Color.magenta);
 	}
 	void Initilize()
 	{
 		transform.rotation = Quaternion.identity;
-		turret = GameObject.Find ("RotationCube").transform;
 		player = GameObject.Find ("Player").transform;
 
 		currentState = States.Sleep;
 	}
 	void Sleep()
 	{
-		if(Vector3.Distance(turret.position, player.position) > 4f)
+		if(Vector3.Distance(transform.position, player.position) > 4f)
 		{
 			currentState = States.Initialize;
 		}
@@ -71,7 +69,7 @@ public class RotateCube : MonoBehaviour {
 			transform.rotation = Quaternion.Slerp (startRotation, endRotation, time);
 			yield return 0;
 		}
-		print("Reached the target.");
+		print("Turned 90 degrees");
 		rotating = false;
 		currentState = States.Sleep;
 	}
