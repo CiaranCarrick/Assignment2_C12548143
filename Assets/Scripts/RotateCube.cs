@@ -2,21 +2,23 @@
 using System.Collections;
 
 public class RotateCube : MonoBehaviour {
-	public Transform player;
-	float shootTime, shootTimer = 0.3f;
-	float searchTime, searchTimer = 4f;
-	float randLookTime, randLookTimer = 0.3f;
-	Quaternion rotation = Quaternion.identity;
-	public float seconds = 0.2f;
+	public float seconds = 0.3f;
 	public bool rotating;
-
+	public int counter;
+	public GameObject door;
+	Quaternion MyRotation;
+	void Start(){
+		MyRotation = transform.rotation;
+	}
+	
 	public enum States //our states
 	{
 		Initialize,
-		Sleep,
+		Awake,
 		Rotate,
+		Sleep,
 	}
-	public States currentState = States.Initialize; //create an instance of the enum and set it's default to Initialize
+	public States currentState = States.Awake; //create an instance of the enum and set it's default to Initialize
 	void Update ()
 	{
 		switch(currentState) //pass in the current state
@@ -24,11 +26,14 @@ public class RotateCube : MonoBehaviour {
 		case States.Initialize:
 			Initilize();
 			break;
-		case States.Sleep:
-			Sleep ();
+		case States.Awake:
+			Awake ();
 			break;
 		case States.Rotate:
 			Rotate ();
+			break;
+		case States.Sleep:
+			Sleep();
 			break;
 		}
 		//Debug.Log (currentState);
@@ -36,41 +41,50 @@ public class RotateCube : MonoBehaviour {
 	}
 	void Initilize()
 	{
-		transform.rotation = Quaternion.identity;
-		player = GameObject.Find ("Player").transform;
-
-		currentState = States.Sleep;
+		StartCoroutine (Rotateme (-transform.localEulerAngles));
+		counter=0;
 	}
-	void Sleep()
+	void Awake()
 	{
-		if(Vector3.Distance(transform.position, player.position) > 4f)
-		{
-			currentState = States.Initialize;
-		}
+		if (currentState != States.Initialize && door.GetComponent<Door> ().currentState == Door.States.Opened) {
+			currentState = States.Sleep;
+		} else
+			currentState = States.Awake; 
 	}
 	void Rotate()
 	{
-		StartCoroutine(Rotateme(Vector3.up*90));
-
+		StartCoroutine(Rotateme(Vector3.up * 90));
 	}
-	
+	void Sleep()
+	{
+		if(transform.position.y > -0.5) {
+			transform.Translate (Vector3.down * 1 * Time.deltaTime);
+		}
+	}
+		
 	IEnumerator Rotateme(Vector3 degrees)
 	{
 		if (rotating) {
 			return true;
 		}
 		rotating = true;
-		float time = 0.0f;
+		float time = 0f;
 		float rate = 1.0f /seconds;
-		Quaternion startRotation = this.transform.rotation;
+		Quaternion startRotation = this.transform.rotation; //Create referance to rotation
 		Quaternion endRotation = this.transform.rotation * Quaternion.Euler (degrees);
 		while (time<1.0f) {
 			time += Time.deltaTime * rate;
-			transform.rotation = Quaternion.Slerp (startRotation, endRotation, time);
-			yield return 0;
+			if(currentState==States.Rotate){
+			transform.rotation = Quaternion.Slerp (startRotation, endRotation, time); //Rotates to desired rotation
+			}
+			else{
+				transform.rotation = Quaternion.Slerp (startRotation, MyRotation, time);//resets to original rotation
+			}
+			yield return 0;//continue to next line and return
 		}
-		print("Turned 90 degrees");
+		//print("Turned 90 degrees");
+		counter= (counter + 1) % 4;
 		rotating = false;
-		currentState = States.Sleep;
+		currentState = States.Awake;
 	}
 } 
