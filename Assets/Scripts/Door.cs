@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Door : MonoBehaviour {
-
+	public Vector3 openpos = new Vector3 (-1.5f, -1.5f, 1.5f);
 	public enum States //our states
 	{
 		Opened,
@@ -23,9 +23,11 @@ public class Door : MonoBehaviour {
 	}
 
 	void Opened(){
-		if (transform.position.y < 5) {
-			transform.Translate (Vector3.up * 1 * Time.deltaTime);
-		}
+		if (transform.position.y >= openpos.y) {
+			transform.Translate (Vector3.down * 1 * Time.deltaTime);
+		} else
+			currentState = States.Opened;
+			renderer.material.color = Color.green;
 	}
 	void Closed(){
 		renderer.material.color = Color.red;
