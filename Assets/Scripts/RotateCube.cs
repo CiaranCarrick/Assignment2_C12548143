@@ -3,10 +3,9 @@ using System.Collections;
 
 public class RotateCube : MonoBehaviour {
 	public float seconds = 0.3f;// Add Fields
-	public bool rotating, reset;
+	public bool rotating, reset, DoorOpened;
 	public int counter, MyCounter;
-	public GameObject door;
-	public GameObject player;
+	public GameObject door, player;
 	public Interaction interaction;
 	Quaternion MyRotation;//
 	Vector3 MyPosition;
@@ -16,7 +15,7 @@ public class RotateCube : MonoBehaviour {
 		MyRotation = transform.rotation; //Cache intial rotation
 		MyPosition = transform.position; //Cache intial Position
 		sleepposition = new Vector3 (transform.position.x, -0.5f, transform.position.z);
-		interaction= player.GetComponentInChildren<Interaction>();
+		interaction = player.GetComponentInChildren<Interaction> ();
 	}
 	
 	public enum States //States
@@ -66,11 +65,10 @@ public class RotateCube : MonoBehaviour {
 		else
 			renderer.material.color=Color.red;
 
-		if (door.GetComponent<Door> ().currentState == Door.States.Opened)
-		    {
+		if (door.GetComponent<Door> ().currentState == Door.States.Opened) {
 			currentState = States.move;
-		}else
-			currentState = States.Awake;// Double check to set state after if
+		}
+
 	}
 	void Rotate()
 	{
@@ -78,19 +76,28 @@ public class RotateCube : MonoBehaviour {
 	}
 	void Sleep()
 	{
-		if (door.transform.position.y >=door.GetComponent<Door>().openpos.y) {
+		if (door.GetComponent<Door>().Doorsize>=1) {
 			door.GetComponent<Door>().currentState=Door.States.Closed;
-		} else
+			}
+		 else
 			door.GetComponent<Door>().currentState=Door.States.Opened;
 			currentState = States.Awake;
+		if (door.GetComponent<Door>().Doorsize<= 1) {
+			reset=true;
+			currentState=States.move;
+		}
 	}
 	void move(){
 		renderer.material.color = Color.white;
 		if (transform.position.y > sleepposition.y) {
 			transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
-		} else
-			currentState = States.Sleep;
+		} if (transform.position.y < sleepposition.y && reset==false) {
+			 currentState = States.Sleep;
+		}
+		else
+			currentState=States.move;
 	}
+
 		
 	IEnumerator Rotateme(Vector3 degrees)
 	{
@@ -105,21 +112,22 @@ public class RotateCube : MonoBehaviour {
 		while (time<1.0f) {
 			time += Time.deltaTime * rate;
 			if(currentState==States.Rotate){
-			transform.rotation = Quaternion.Slerp (startRotation, endRotation, time); //Rotates to desired rotation
+				transform.rotation = Quaternion.Slerp (startRotation, endRotation, time); //Rotates to desired rotation
 			}
 			else{
 				reset=true;
 				transform.rotation = Quaternion.Slerp (startRotation, MyRotation, time);//resets to original rotation
 			}
-			yield return 0;//continue to next line and returns 0
+			yield return null;//continue to next line and returns 0
 		}
 		//print("Turned 90 degrees");
 		counter= (counter+1) % 4; //Resets once reachs 4
-		if (reset) {
-			counter = MyCounter;
-			reset = false;
+		if (reset) { // excuted when Switch is pressed 
+			counter = MyCounter;//
+			reset = false;//
 		}
 		rotating = false; //deactivate boolean
-		currentState = States.Awake; //returns state back to Awake
+		interaction.gotem = true;
+		currentState = States.Awake; //Set back tp awake
 	}
 } 

@@ -2,7 +2,16 @@
 using System.Collections;
 
 public class Door : MonoBehaviour {
-	public Vector3 openpos = new Vector3 (-1.5f, -1.5f, 1.5f);
+	public GameObject Switch;
+	public float Doorsize;
+	float width;
+
+
+	void Start(){
+		Doorsize=100;
+		width = transform.localScale.x;
+		Switch = GameObject.Find ("Stand/Switch");//Make Referance to Child object Switch
+	}
 	public enum States //our states
 	{
 		Opened,
@@ -11,6 +20,7 @@ public class Door : MonoBehaviour {
 	public States currentState = States.Closed; //create an instance of the enum and set it's default to Initialize
 	void Update ()
 	{
+		Switch.renderer.material.color = this.renderer.material.color; //Switch colour dictated by Door State Green(Opened) or Red(Closed)
 		switch (currentState) 
 		{ //pass in the current state
 		case States.Opened:
@@ -23,12 +33,21 @@ public class Door : MonoBehaviour {
 	}
 
 	void Opened(){
-		if (transform.position.y >= openpos.y) {
-			transform.Translate (Vector3.down * 1 * Time.deltaTime);
-		} else
+		float timer=0.3f;
+		Vector3 pos = transform.position;
+		Vector3 scale = transform.localScale;
+		if (Doorsize >= 1 && currentState==States.Opened) {
+			Doorsize -= 2*timer;
+			scale.x = (width / 100) * Doorsize;
+			pos.y = transform.position.y - ((transform.localScale.x - scale.x) / 2);
+			transform.localScale = scale; 
+			transform.position = pos;
+		}
+			else
 			currentState = States.Opened;
 			renderer.material.color = Color.green;
 	}
+
 	void Closed(){
 		renderer.material.color = Color.red;
 	}
