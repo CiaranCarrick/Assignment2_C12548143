@@ -3,19 +3,21 @@ using System.Collections;
 
 public class RotateCube : MonoBehaviour {
 	public float seconds = 0.3f;// Add Fields
-	public bool rotating, reset, DoorOpened;
+	public bool rotating, reset, DoorOpened;//Left all public to show whats happening in inspector
 	public int counter, MyCounter;
 	public GameObject door, player;
 	public Interaction interaction;
 	Quaternion MyRotation;//
-	Vector3 MyPosition;
-	public Vector3 sleepposition;
-	void Start(){
+	public Vector3 Sleepposition, MyAwakePosition;
+	
+	void Start(){//I could have run a for loop and printed 3 cubes and used add.component to add scripts but visually easier this way
 		counter = MyCounter;
 		MyRotation = transform.rotation; //Cache intial rotation
-		MyPosition = transform.position; //Cache intial Position
-		sleepposition = new Vector3 (transform.position.x, -0.5f, transform.position.z);
-		interaction = player.GetComponentInChildren<Interaction> ();
+		MyAwakePosition = transform.position; //Cache intial Position
+		Sleepposition = new Vector3 (transform.position.x, -0.5f, transform.position.z);
+		door = GameObject.Find ("Door");
+		player = GameObject.Find ("Player");
+		interaction = player.GetComponentInChildren<Interaction> ();//Find interaction script in player object
 	}
 	
 	public enum States //States
@@ -24,7 +26,7 @@ public class RotateCube : MonoBehaviour {
 		Awake,
 		Rotate,
 		Sleep,
-		move,
+		Move,
 	}
 	public States currentState = States.Awake; //create an instance of the Enum, set to Initialize
 	void Update ()
@@ -32,7 +34,7 @@ public class RotateCube : MonoBehaviour {
 		switch(currentState) //pass in current state
 		{
 		case States.Initialize:
-			Initilize();
+			initialize();
 			break;
 		case States.Awake:
 			Awake ();
@@ -43,62 +45,66 @@ public class RotateCube : MonoBehaviour {
 		case States.Sleep:
 			Sleep();
 			break;
-		case States.move:
-			move();
+		case States.Move:
+			Move();
 			break;
 		}
 		//Debug.Log (currentState);
 		Debug.DrawRay(transform.position, transform.transform.forward * 10f, Color.magenta);
 	}
-	void Initilize()
+	void initialize()
 	{
-		StartCoroutine (Rotateme (-transform.localEulerAngles));
+		StartCoroutine (Rotateme (-transform.localEulerAngles)); //Resets to default orientation
 		if (counter == interaction.keyrotation){
-			renderer.material.color = Color.green;
+			renderer.material.color = Color.green; //Flashs green during initialize state, so when you activate switch it will show you whether the blocks Counter == Interaction.Keyrotation
 		}
 	}
+	
 	public void Awake()
 	{
-		if(transform.position.y < MyPosition.y){
+		if(transform.position.y < MyAwakePosition.y){ //Resets Cube back to Awake position from SleepPosition
 			transform.Translate (Vector3.up * 3 * Time.deltaTime); //Lowers Cubes once reachs position
 		}
 		else
 			renderer.material.color=Color.red;
-
+		
 		if (door.GetComponent<Door> ().currentState == Door.States.Opened) {
-			currentState = States.move;
+			currentState = States.Move;
 		}
-
+		
 	}
+	
 	void Rotate()
 	{
-		StartCoroutine(Rotateme(Vector3.up * 90));
+		StartCoroutine(Rotateme(Vector3.up * 90)); //Coroutine Rotates the cube 90 degrees, 
 	}
+	
 	void Sleep()
 	{
-		if (door.GetComponent<Door>().Doorsize>=1) {
+		if (door.GetComponent<Door>().Doorsize>=1) {//Whens the doors Size reachs 1, set door to closed state
 			door.GetComponent<Door>().currentState=Door.States.Closed;
-			}
-		 else
-			door.GetComponent<Door>().currentState=Door.States.Opened;
-			currentState = States.Awake;
-		if (door.GetComponent<Door>().Doorsize<= 1) {
-			reset=true;
-			currentState=States.move;
-		}
-	}
-	void move(){
-		renderer.material.color = Color.white;
-		if (transform.position.y > sleepposition.y) {
-			transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
-		} if (transform.position.y < sleepposition.y && reset==false) {
-			 currentState = States.Sleep;
 		}
 		else
-			currentState=States.move;
+			door.GetComponent<Door>().currentState=Door.States.Opened;//Until then, set door to opened state
+		currentState = States.Awake;//Keep cube active
+		if (door.GetComponent<Door>().Doorsize<= 1) { //Once it reachs 1, reset change state to move
+			currentState=States.Move;
+		}
 	}
-
-		
+	
+	void Move(){
+		renderer.material.color = Color.white;
+		if (transform.position.y >= Sleepposition.y) { 
+			transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
+			if (transform.position.y <= Sleepposition.y) {
+				currentState = States.Sleep;
+			}
+		}
+		else//Double check to be safe
+			currentState=States.Move;//
+	}
+	
+	
 	IEnumerator Rotateme(Vector3 degrees)
 	{
 		if (rotating) {
@@ -114,20 +120,20 @@ public class RotateCube : MonoBehaviour {
 			if(currentState==States.Rotate){
 				transform.rotation = Quaternion.Slerp (startRotation, endRotation, time); //Rotates to desired rotation
 			}
-			else{
+			else{// Only activateed via switch, rotating blocks never reachs this code
 				reset=true;
 				transform.rotation = Quaternion.Slerp (startRotation, MyRotation, time);//resets to original rotation
 			}
-			yield return null;//continue to next line and returns 0
+			yield return null;//stop, continue to next line and return null
 		}
 		//print("Turned 90 degrees");
-		counter= (counter+1) % 4; //Resets once reachs 4
-		if (reset) { // excuted when Switch is pressed 
-			counter = MyCounter;//
-			reset = false;//
+		counter= (counter+1) % 4; //Resets once reachs 4, when cube reachs its original rotation
+		if (reset) { // excuted when Switch is pressed and Rotation cubes Counter != keyrotation
+			counter = MyCounter;//reset counter to MyCounter
+			reset = false;//reset boolean
 		}
-		rotating = false; //deactivate boolean
-		interaction.gotem = true;
-		currentState = States.Awake; //Set back tp awake
+		rotating = false; //reset boolean
+		interaction.Checkcubes = true; //Referance Re-activates bool to allow Rotation cubes to be checked
+		currentState = States.Awake; //Set State back to awake
 	}
 } 

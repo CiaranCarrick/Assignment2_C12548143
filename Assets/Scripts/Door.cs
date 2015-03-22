@@ -4,11 +4,11 @@ using System.Collections;
 public class Door : MonoBehaviour {
 	public GameObject Switch;
 	public float Doorsize;
-	float width;
+	public float width; // Variable to hold localscale.x
 
 
 	void Start(){
-		Doorsize=100;
+		Doorsize=100; //100 indicates doors max scale
 		width = transform.localScale.x;
 		Switch = GameObject.Find ("Stand/Switch");//Make Referance to Child object Switch
 	}
@@ -33,15 +33,15 @@ public class Door : MonoBehaviour {
 	}
 
 	void Opened(){
-		float timer=0.3f;
+		float timer=0.8f; //Doors closing speed
 		Vector3 pos = transform.position;
 		Vector3 scale = transform.localScale;
 		if (Doorsize >= 1 && currentState==States.Opened) {
-			Doorsize -= 2*timer;
-			scale.x = (width / 100) * Doorsize;
+			Doorsize -= timer;
+			scale.x = (width / 100) * Doorsize;//Helps shrink door over time
 			pos.y = transform.position.y - ((transform.localScale.x - scale.x) / 2);
-			transform.localScale = scale; 
-			transform.position = pos;
+			transform.localScale = scale;//Assign Transforms new values
+			transform.position = pos;//
 		}
 			else
 			currentState = States.Opened;

@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Interaction : MonoBehaviour {
 
-	bool displaybox = false; //Displays GUI box when raycast hights interaction layers
-	public bool gotem=true; //Bool to check if all cube[] elements are equal
+	public bool displaybox = false; //Displays GUI box when raycast hights interaction layers
+	public bool Checkcubes=true; //Bool to check if all cube[] elements are equal
 
 	public GameObject[] cube;
 	public GameObject door;
@@ -13,7 +13,7 @@ public class Interaction : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
-		gotem=true;
+		Checkcubes=true;
 		keyrotation = 2;//Intially set keycombination to be 2
 		cube = GameObject.FindGameObjectsWithTag("RotationCube"); //Locte Rotation and Add to Cube[]
 		doorscript = door.GetComponent<Door> ();
@@ -39,14 +39,14 @@ public class Interaction : MonoBehaviour {
 					for (int i = 0; i < cube.Length; i++)//Iterate through Cube array
 					{ 
 						if (cube[i].GetComponent<RotateCube>().counter!=keyrotation ) { //if any cubes don't equal keyrotation, set false and reset each cube and break from loop
-							gotem=false;
+							Checkcubes=false;
 							foreach(GameObject c in cube){
 							c.GetComponent<RotateCube>().currentState=RotateCube.States.Initialize;
 							}
 							break; //iterates through loop then breaks all cubes rather than cube[0]
 						}
 					}
-					if(gotem){// if true, search all cubes and rotate, open door and randomize keyrotation
+					if(Checkcubes){// if true, search all cubes and rotate, open door and randomize keyrotation
 						foreach(GameObject c in cube){
 							c.GetComponent<RotateCube>().currentState=RotateCube.States.Initialize; // reset Cube
 						}
