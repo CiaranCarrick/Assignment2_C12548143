@@ -2,21 +2,22 @@
 using System.Collections;
 
 public class Door : MonoBehaviour {
-	public GameObject Switch;
+	public GameObject Switch;//referance
 	public float Doorsize;
 	public float width; // Variable to hold localscale.x
-
-
-	void Start(){
+	
+	void Start() {
 		Doorsize=100; //100 indicates doors max scale
 		width = transform.localScale.x;
 		Switch = GameObject.Find ("Stand/Switch");//Make Referance to Child object Switch
-	}
+	}//End Start
+	
 	public enum States //our states
 	{
-		Opened,
+		Opened, 
 		Closed,
-	}
+	}//End States
+	
 	public States currentState = States.Closed; //create an instance of the enum and set it's default to Initialize
 	void Update ()
 	{
@@ -24,16 +25,16 @@ public class Door : MonoBehaviour {
 		switch (currentState) 
 		{ //pass in the current state
 		case States.Opened:
-				Opened();
-				break;
+			Opened();
+			break;
 		case States.Closed:
-				Closed();
-				break;
+			Closed();
+			break;
 		}
-	}
-
-	void Opened(){
-		float timer=0.8f; //Doors closing speed
+	}//end Update
+	
+	void Opened() {
+		float timer=0.5f; //Doors closing speed
 		Vector3 pos = transform.position;
 		Vector3 scale = transform.localScale;
 		if (Doorsize >= 1 && currentState==States.Opened) {
@@ -43,12 +44,12 @@ public class Door : MonoBehaviour {
 			transform.localScale = scale;//Assign Transforms new values
 			transform.position = pos;//
 		}
-			else
+		else
 			currentState = States.Opened;
 			renderer.material.color = Color.green;
-	}
-
-	void Closed(){
+	}//end Opened
+	
+	void Closed() {
 		renderer.material.color = Color.red;
-	}
-}
+	}//end Closed
+}//End Main

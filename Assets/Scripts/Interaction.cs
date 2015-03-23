@@ -2,28 +2,29 @@
 using System.Collections;
 
 public class Interaction : MonoBehaviour {
-
+	
 	public bool displaybox = false; //Displays GUI box when raycast hights interaction layers
 	public bool Checkcubes=true; //Bool to check if all cube[] elements are equal
-
+	
 	public GameObject[] cube;
-	public GameObject door;
-	public Door doorscript;
-	public int keyrotation;
+	public GameObject door;//referances
+	public Door doorscript;//
+	public int keyrotation;//
 	
 	// Use this for initialization
 	void Start () {
 		Checkcubes=true;
-		keyrotation = 2;//Intially set keycombination to be 2
+		keyrotation = 2;//Intially set keycombination to be 2, set will always be 2, 1, 1 then randomized in interact
 		cube = GameObject.FindGameObjectsWithTag("RotationCube"); //Locte Rotation and Add to Cube[]
 		doorscript = door.GetComponent<Door> ();
 	}
+
 	// Update is called once per frame
 	void Update () {
-		Debug.DrawRay(transform.position, transform.forward * 3f, Color.green);
+		//Debug.DrawRay(transform.position, transform.forward * 3f, Color.green);
 		Interact ();
 	}
-
+	
 	void Interact() {
 		RaycastHit hit;
 		if (Physics.Raycast(transform.position, transform.forward, out hit, 3f, 1<<8) && doorscript.currentState==Door.States.Closed)
@@ -35,34 +36,34 @@ public class Interaction : MonoBehaviour {
 					if (hit.collider.GetComponent<RotateCube>().currentState==RotateCube.States.Awake)
 						hit.collider.GetComponent<RotateCube>().currentState=RotateCube.States.Rotate;
 				}
-				if (hit.collider.gameObject.name==("Switch")) {
+				if (hit.collider.name==("Switch")) {
 					for (int i = 0; i < cube.Length; i++)//Iterate through Cube array
 					{ 
 						if (cube[i].GetComponent<RotateCube>().counter!=keyrotation ) { //if any cubes don't equal keyrotation, set false and reset each cube and break from loop
 							Checkcubes=false;
-							foreach(GameObject c in cube){
-							c.GetComponent<RotateCube>().currentState=RotateCube.States.Initialize;
+							foreach(GameObject c in cube) {
+								c.GetComponent<RotateCube>().currentState=RotateCube.States.Initialize;
 							}
 							break; //iterates through loop then breaks all cubes rather than cube[0]
 						}
 					}
-					if(Checkcubes){// if true, search all cubes and rotate, open door and randomize keyrotation
-						foreach(GameObject c in cube){
+					if (Checkcubes) {// if true, search all cubes and rotate, open door and randomize keyrotation
+						foreach(GameObject c in cube) {
 							c.GetComponent<RotateCube>().currentState=RotateCube.States.Initialize; // reset Cube
 						}
 						doorscript.currentState=Door.States.Opened;
 						keyrotation=Random.Range(0, 4);
 					}
 				}//end for loops
-			}//end
+			}//end input
 		}//end ray
 		else
 			displaybox=false;
+	}//end Interact
 
-	}//end input
-	void OnGUI(){
-		if (displaybox) {
-			GUI.Box(new Rect(Screen.width/2-25, Screen.height /2-25, 50, 20),"E");
+	void OnGUI() {
+		if (displaybox) {//Displays when raycast is hitting interactable colliders
+			GUI.Box(new Rect(Screen.width/2-25, Screen.height /2-25, 50, 20), "E");
 		}
-	}
-}
+	}//End OnGUI
+}//End Main
