@@ -60,6 +60,7 @@ public class RotateCube : MonoBehaviour {
 			renderer.material.color = Color.green; //Flashs green during initialize state, so when you activate switch it will show you whether the blocks Counter == Interaction.Keyrotation
 		}
 	}//End Initialize
+
 	
 	public void Awake()
 	{
@@ -73,12 +74,14 @@ public class RotateCube : MonoBehaviour {
 			currentState = States.Move;
 		}
 	}//  End Awake
+
 	
 	void Rotate()
 	{
 		StartCoroutine(Rotateme(Vector3.up * 90)); //Coroutine Rotates the cube 90 degrees,
 	}//End Rotate
-	
+
+
 	void Sleep()
 	{
 		if (door.GetComponent<Door>().Doorsize>=1) {//Whens the doors Size reachs 1, set door to closed state
@@ -86,18 +89,16 @@ public class RotateCube : MonoBehaviour {
 		}
 		else
 			door.GetComponent<Door>().currentState=Door.States.Opened;//Until then, set door to opened state
-		currentState = States.Awake;//Keep cube active
-		if (door.GetComponent<Door>().Doorsize<= 1) { //Once it reachs 1, reset change state to move
-			currentState=States.Move;
-		}
+			currentState = States.Awake;//Keep cube active while doorsize != 1
 	}//  End Sleep
-	
+
+
 	void Move() {
 		renderer.material.color = Color.white;
 		if (transform.position.y >= Sleepposition.y) { 
 			transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
 			if (transform.position.y <= Sleepposition.y) {
-				currentState = States.Sleep;//Sey currantstate to Sleep
+				currentState = States.Sleep;//Set currentstate to Sleep
 			}
 		}//end if
 	}//end Move
