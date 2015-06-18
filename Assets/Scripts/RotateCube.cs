@@ -12,6 +12,7 @@ public class RotateCube : MonoBehaviour {
 	
 	void Start() {//I could have run a for loop and printed 3 cubes and used add.component to add scripts but visually easier this way
 		counter = MyCounter;
+		currentState = States.Initialize;
 		MyRotation = transform.rotation; //Cache intial rotation
 		MyAwakePosition = transform.position; //Cache intial Position
 		Sleepposition = new Vector3 (transform.position.x, -0.5f, transform.position.z);
@@ -84,22 +85,24 @@ public class RotateCube : MonoBehaviour {
 
 	void Sleep()
 	{
-		if (door.GetComponent<Door>().Doorsize>=1) {//Whens the doors Size reachs 1, set door to closed state
-			door.GetComponent<Door>().currentState=Door.States.Closed;
-		}
-		else
-			door.GetComponent<Door>().currentState=Door.States.Opened;//Until then, set door to opened state
+		if (door.GetComponent<Door> ().Doorsize >= 1) {//Whens the doors Size reachs 1, set door to closed state
+						door.GetComponent<Door> ().currentState = Door.States.Closed;
+			} else
+
+		if (door.GetComponent<Door> ().currentState == Door.States.Opened && transform.position.y == Sleepposition.y) {//Until then, set door to opened state
 			currentState = States.Awake;//Keep cube active while doorsize != 1
+		} else
+			currentState = States.Sleep; //If Doorsize <=1 and doors open, set to sleep
 	}//  End Sleep
 
 
 	void Move() {
-		renderer.material.color = Color.white;
+		renderer.material.color = Color.white;// Set to default colour
 		if (transform.position.y >= Sleepposition.y) { 
-			transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
-			if (transform.position.y <= Sleepposition.y) {
-				currentState = States.Sleep;//Set currentstate to Sleep
-			}
+				transform.Translate (Vector3.down * 3 * Time.deltaTime); //Lowers Cubes once reachs position
+				if (transform.position.y <= Sleepposition.y) {
+					currentState = States.Sleep;//Set currentstate to Sleep
+		}
 		}//end if
 	}//end Move
 	
