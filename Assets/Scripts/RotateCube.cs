@@ -138,4 +138,4 @@ public class RotateCube : MonoBehaviour {
 		interaction.Checkcubes = true; //Referance Re-activates bool to allow Rotation cubes to be checked
 		currentState = States.Awake; //Set State back to awake
 	}//End Rotateme
-}
+}//End Main
